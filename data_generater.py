@@ -1,3 +1,4 @@
+import os
 import time
 import ssl
 import struct
@@ -5,8 +6,10 @@ import random
 import base64
 import paho.mqtt.client as mqtt
 
-BROKER = "your-broker.example.com"
-PORT = 8883
+BROKER = "apamamatj.latest.stage.c8i.io"
+USER = "t9680/matj"
+PASSWORD = os.environ.get("C8Y_PASSWORD")
+PORT = 9883
 TOPIC = "turbine/gearbox/data"
 
 # Chance per message of failure (tuned for “rare but visible in 10 min”)
@@ -51,11 +54,12 @@ def generate_message():
     payload = struct.pack(">10f", *values)
 
     # Base64 encode for Analytics Builder
-    return base64.b64encode(payload).decode("ascii")
+    return payload
 
 
 def main():
     client = mqtt.Client()
+    client.username_pw_set(USER, PASSWORD)
     client.tls_set(cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2)
     client.connect(BROKER, PORT)
     client.loop_start()
