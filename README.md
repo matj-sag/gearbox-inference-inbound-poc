@@ -1,7 +1,3 @@
-Fine, here it is again, flattened, no fancy indentation games, no markdown code fencing inside markdown, just a clean single block you can paste straight into README.md without it turning into abstract art.
-
----
-
 # Wind Turbine Gearbox Analytics Builder Demo
 
 This repository contains a complete end-to-end demo pipeline for Cumulocity Analytics Builder that showcases how MQTT ingestion, JavaScript preprocessing, ONNX inference, rule-based postprocessing, and LLM-driven diagnostics work together to detect and respond to emerging gearbox faults in a wind turbine.
