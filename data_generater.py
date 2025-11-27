@@ -6,7 +6,7 @@ import random
 import base64
 import paho.mqtt.client as mqtt
 
-BROKER = "apamamatj.latest.stage.c8i.io"
+BROKER = "apamamatj.latest.stage.c8y.io"
 USER = "t9680/matj"
 PASSWORD = os.environ.get("C8Y_PASSWORD")
 PORT = 9883
@@ -60,7 +60,7 @@ def generate_message():
 def main():
     client = mqtt.Client()
     client.username_pw_set(USER, PASSWORD)
-    client.tls_set(cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2)
+    client.tls_set(cert_reqs=ssl.CERT_NONE)
     client.connect(BROKER, PORT)
     client.loop_start()
 
