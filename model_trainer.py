@@ -8,9 +8,11 @@ class GearboxNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(10, 16),
-            nn.ReLU(),
-            nn.Linear(16, 4)
+           nn.Linear(10, 32),
+           nn.ReLU(),
+           nn.Linear(32, 16),
+           nn.ReLU(),
+           nn.Linear(16, 4)
         )
 
     def forward(self, x):
@@ -55,7 +57,7 @@ Y = torch.tensor(np.array(Y), dtype=torch.long)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-for epoch in range(25):
+for epoch in range(200):
     optimizer.zero_grad()
     logits = model.net(X)
     loss = criterion(logits, Y)

@@ -32,5 +32,5 @@ Torque: ${torque}
 Provide a likely root cause, probable secondary effects, and clear recommended diagnostic steps for a field engineer.
     `.trim();
 
-    return [null, null, good, prompt];
+    return [temp, torque, good, prompt];
 }

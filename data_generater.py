@@ -5,6 +5,8 @@ import struct
 import random
 import base64
 import paho.mqtt.client as mqtt
+import onnxruntime as ort
+import numpy as np
 
 BROKER = "apamamatj.latest.stage.c8y.io"
 USER = "t9680/matj"
@@ -13,7 +15,20 @@ PORT = 9883
 TOPIC = "turbine/gearbox/data"
 
 # Chance per message of failure (tuned for “rare but visible in 10 min”)
-FAIL_PROB = 0.02  # ~2 percent
+FAIL_PROB = 0.05  # ~5 percent
+
+# Load ONNX model once, not 4000 times like a lunatic
+session = ort.InferenceSession("gearbox_model.onnx", providers=["CPUExecutionProvider"])
+model_input = session.get_inputs()[0].name
+model_output = session.get_outputs()[0].name
+
+def classify_with_model(vector):
+    """vector: list[float] -> returns model output"""
+    arr = np.array([vector], dtype=np.float32)
+    result = session.run([model_output], {model_input: arr})
+    print(str(result))
+    return result[0][0]   # unwrap
+
 
 def generate_fft_pattern(mode):
     # Base patterns for each class
@@ -54,7 +69,7 @@ def generate_message():
     payload = struct.pack(">10f", *values)
 
     # Base64 encode for Analytics Builder
-    return payload
+    return (mode, values, payload)
 
 
 def main():
@@ -67,7 +82,9 @@ def main():
     start = time.time()
     print("Publishing for ~10 minutes...")
     while time.time() - start < 600:
-        msg = generate_message()
+        (mode, values, msg) = generate_message()
+        model_pred = classify_with_model(values)
+        print(f"[MODEL] Predicted={model_pred[0]:.3f} Actual={mode} Values={values}")
         client.publish(TOPIC, msg)
         time.sleep(1)
 
