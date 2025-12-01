@@ -1,8 +1,7 @@
 export function onInput(inputs, context) {
     // input[0] = base64 string
-	 console.log("decoding.js onInput called with inputs:", inputs);
+    console.log("decoding.js onInput called with inputs: "+ inputs);
     const bin = Base64.decode(inputs[0]);
-	console.log("Decoded binary data:", bin.length);
 
     if (bin.length < 40) {
         // 10 float32 values expected

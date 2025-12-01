@@ -1,4 +1,5 @@
 export function onInput(inputs, context) {
+    console.log("decision.js onInput called with inputs: "+ inputs);
     const raw = String(inputs[0] || "[]");
     const temp = Number(inputs[1] || 0);
     const torque = Number(inputs[2] || 0);
