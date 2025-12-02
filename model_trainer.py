@@ -19,8 +19,7 @@ class GearboxNet(nn.Module):
         logits = self.net(x)
         probs = torch.softmax(logits, dim=1)
         conf, indices = torch.max(probs, 1)
-        # model outputs: [class_id, confidence]
-        return torch.stack([indices.float(), conf], dim=1)
+        return indices.float(), conf
 
 model = GearboxNet()
 
@@ -65,5 +64,5 @@ for epoch in range(200):
     optimizer.step()
 
 dummy = torch.randn(1,10)
-onnx.export(model, dummy, "gearbox_model.onnx", input_names=['input'], output_names=['output'])
+onnx.export(model, dummy, "gearbox_model.onnx", input_names=['input'], output_names=['class', 'confidence'])
 print("Saved gearbox_model.onnx")

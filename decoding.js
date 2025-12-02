@@ -1,8 +1,8 @@
 export function onInput(inputs, context) {
+    console.log("Decoding onInput: inputs[0]="+inputs[0].value)
     // input[0] = base64 string
-    console.log("decoding.js onInput called with inputs: "+ inputs);
-    const bin = Base64.decode(inputs[0]);
-
+    const bin = Base64.decode(inputs[0].value);
+    
     if (bin.length < 40) {
         // 10 float32 values expected
         return [];
@@ -19,7 +19,7 @@ export function onInput(inputs, context) {
     const torque = values[9];
 
     return [
-        JSON.stringify(values), // out0 → ONNX input
+        JSON.stringify([values]), // out0 → ONNX input
         temp,                   // out1
         torque,                 // out2
     ];

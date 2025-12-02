@@ -1,10 +1,9 @@
 export function onInput(inputs, context) {
-    console.log("decision.js onInput called with inputs: "+ inputs);
-    const raw = String(inputs[0] || "[]");
-    const temp = Number(inputs[1] || 0);
-    const torque = Number(inputs[2] || 0);
-    const cls = Number(inputs[3] || 0);
-    const conf = Number(inputs[4] || 0);
+    const raw = String(inputs[0].value || "[]");
+    const temp = Number(inputs[1].value || 0);
+    const torque = Number(inputs[2].value || 0);
+    const cls = Number(inputs[3].value || 0);
+    const conf = Number(inputs[4].value || 0);
 
     const labelMap = {
         0: "normal",
@@ -15,7 +14,7 @@ export function onInput(inputs, context) {
 
     const label = labelMap[cls] || "unknown";
 
-    const good = (cls === 0) && (conf > 0.80);
+    const good = (cls === 0);
 
     if (good) {
         return [temp, torque, good];

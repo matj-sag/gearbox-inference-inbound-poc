@@ -20,14 +20,15 @@ FAIL_PROB = 0.05  # ~5 percent
 # Load ONNX model once, not 4000 times like a lunatic
 session = ort.InferenceSession("gearbox_model.onnx", providers=["CPUExecutionProvider"])
 model_input = session.get_inputs()[0].name
-model_output = session.get_outputs()[0].name
+model_output1 = session.get_outputs()[0].name
+model_output2 = session.get_outputs()[1].name
 
 def classify_with_model(vector):
     """vector: list[float] -> returns model output"""
     arr = np.array([vector], dtype=np.float32)
-    result = session.run([model_output], {model_input: arr})
+    result,conf = session.run([model_output1, model_output2], {model_input: arr})
     print(str(result))
-    return result[0][0]   # unwrap
+    return result[0],conf[0]   # unwrap
 
 
 def generate_fft_pattern(mode):
@@ -83,8 +84,8 @@ def main():
     print("Publishing for ~10 minutes...")
     while time.time() - start < 600:
         (mode, values, msg) = generate_message()
-        model_pred = classify_with_model(values)
-        print(f"[MODEL] Predicted={model_pred[0]:.3f} Actual={mode} Values={values}")
+        model_pred, model_conf = classify_with_model(values)
+        print(f"[MODEL] Predicted={model_pred:.3f},{model_conf:.3f} Actual={mode} Values={values}")
         client.publish(TOPIC, msg)
         time.sleep(1)
 
