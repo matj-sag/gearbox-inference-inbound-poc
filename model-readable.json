@@ -11,7 +11,6 @@
             "categoryId" : "Input",
             "id" : "apamax.analyticsbuilder.samples.DeviceInput",
             "key" : -1,
-            "location" : "-224 -616",
             "parameters" : [
                {
                   "id" : "transport",
@@ -29,7 +28,6 @@
             "categoryId" : "Output",
             "id" : "apama.analyticskit.blocks.cumulocity.CreateMeasurement",
             "key" : -3,
-            "location" : "856 -728",
             "parameters" : [
                {
                   "c8y_type" : "c8y_deviceIdOrCurrentDevice",
@@ -51,7 +49,6 @@
             "categoryId" : "Calculations",
             "id" : "apamax.analyticsbuilder.samples.AIAgent",
             "key" : -4,
-            "location" : "584 -240",
             "parameters" : [
                {
                   "id" : "agentName",
@@ -68,7 +65,6 @@
             "categoryId" : "Calculations",
             "id" : "apamax.analyticsbuilder.samples.SmartFunction",
             "key" : -5,
-            "location" : "-208 -408",
             "parameters" : [
                {
                   "id" : "label",
@@ -86,7 +82,6 @@
             "categoryId" : "Output",
             "id" : "apama.analyticskit.blocks.cumulocity.CreateAlarm",
             "key" : -6,
-            "location" : "856 -272",
             "parameters" : [
                {
                   "c8y_type" : "c8y_deviceIdOrCurrentDevice",
@@ -108,7 +103,6 @@
             "categoryId" : "Calculations",
             "id" : "apamax.analyticsbuilder.samples.ONNX",
             "key" : -7,
-            "location" : "56 -408",
             "parameters" : [
                {
                   "id" : "onnxModelFile",
@@ -121,7 +115,6 @@
             "categoryId" : "Calculations",
             "id" : "apamax.analyticsbuilder.samples.SmartFunction",
             "key" : -8,
-            "location" : "328 -552",
             "parameters" : [
                {
                   "id" : "label",
@@ -138,7 +131,6 @@
             "categoryId" : "Logic",
             "id" : "apama.analyticskit.blocks.core.Not",
             "key" : -9,
-            "location" : "656 -392",
             "parameters" : [],
             "type" : "Analytics Block"
          },
@@ -147,7 +139,6 @@
             "categoryId" : "Output",
             "id" : "apama.analyticskit.blocks.cumulocity.CreateMeasurement",
             "key" : -10,
-            "location" : "856 -528",
             "parameters" : [
                {
                   "c8y_type" : "c8y_deviceIdOrCurrentDevice",
