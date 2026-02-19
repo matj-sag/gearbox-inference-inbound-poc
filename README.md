@@ -97,7 +97,9 @@ Create an AI Agent in the AI Agent Manager using agent-system-prompt.txt
 
 Create a Data Preparation rule subscribed to MQTT topic turbine/gearbox/data
 
-Use data_prep_decoding.js as the Smart Function
+Use data_prep_decoding.js as the Smart Function, or get the AI to generate it with the prompt:
+
+	The payload is binary packed 10 32-bit floats in big endian. The last two are the temperature and torque, the rest are raw features. Create a Cumulocity Event with type ai_InferenceInput containing fragments temperature.value, torque.value and rawValues.values
 
 ### Create the Analytics Builder model
 
