@@ -69,6 +69,14 @@ Pipeline steps:
 
 ## How to Run the Demo
 
+You will need a tenant with at least Apama version v27.50.0 deployed, and subscribed to:
+
+* data-prep-ctrl
+* Data Preparation
+* Data Prep Plugin
+* AI agents (0.8.5+)
+* AI plugin (0.8.5+)
+
 ### Train or regenerate the ONNX model (optional)
 
 Run:
