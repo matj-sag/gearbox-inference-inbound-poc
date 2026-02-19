@@ -8,11 +8,12 @@ import paho.mqtt.client as mqtt
 import onnxruntime as ort
 import numpy as np
 
-BROKER = "apamamatj.latest.stage.c8y.io"
-USER = "t9680/matj"
+BROKER = "apamamatj1.latest.stage.c8y.io"
+USER = "t52092688/matj"
 PASSWORD = os.environ.get("C8Y_PASSWORD")
 PORT = 9883
 TOPIC = "turbine/gearbox/data"
+CLIENTID="gearbox-simulator-001"
 
 # Chance per message of failure (tuned for “rare but visible in 10 min”)
 FAIL_PROB = 0.05  # ~5 percent
@@ -74,7 +75,7 @@ def generate_message():
 
 
 def main():
-    client = mqtt.Client()
+    client = mqtt.Client(client_id=CLIENTID)
     client.username_pw_set(USER, PASSWORD)
     client.tls_set(cert_reqs=ssl.CERT_NONE)
     client.connect(BROKER, PORT)

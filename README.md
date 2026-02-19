@@ -17,15 +17,18 @@ Pipeline steps:
    * gearbox torque
    The script injects occasional synthetic failure conditions (bearing wear, gear tooth damage, shaft misalignment).
 
-2. JavaScript Preprocessing Function
+2. DataPreparation JavaScript Smart Function
+	* Data Preparation rule receives from the MQTT source
+	* Decodes the binary payload
+	* Creates a Cumulocity Event with the decoded raw values for inference
+
+3. JavaScript Preprocessing Function
    The first Analytics Builder JavaScript block:
-   * receives Base64 binary MQTT payload
-   * decodes it into 10 float values
-   * extracts temperature and torque
+	* Extracs from the Cumulocity Event the feature vector and temp/torque values
    * forwards the feature vector to the ONNX model
    * forwards additional values directly to the second JS function
 
-3. ONNX Inference Model
+4. ONNX Inference Model
    A small feed-forward neural network classifies the input into one of four states:
    * 0 normal
    * 1 early_bearing_wear
@@ -33,87 +36,129 @@ Pipeline steps:
    * 3 misalignment
    The model outputs a class ID and confidence score.
 
-4. JavaScript Decision Function
+5. JavaScript Decision Function
    The second JS block receives:
-   * raw features
    * temperature and torque
    * ONNX classification and confidence
    It produces either:
    * a normal measurement payload for healthy cases, or
    * a structured LLM prompt for fault cases
 
-5. LLM Diagnostic Agent
+7. LLM Diagnostic Agent
    When a fault is detected, the LLM receives the classification, confidence, and raw features and produces:
    * root cause analysis
    * secondary effects
    * recommended engineering checks
    A system prompt template is provided to keep responses consistent.
 
+8. Alarm and Measurement creation
+	On non-faults, measurements are created for temperature and torque.
+	On faults alarms are raised with the RCA and recommended checks
+
 ## Repository Contents
 
 * data_generator.py – publishes simulated gearbox data over MQTT
 * model_trainer.py – trains a small model and exports gearbox_model.onnx
-* decoding.js – preprocessing Smart Function
+* data_prep_decoding.js - data decoding Smart Function
+* preprocessing.js – preprocessing Smart Function
 * decision.js – decision/LLM-trigger Smart Function
 * agent-system-prompt.txt – system prompt for the diagnostic agent
-* model-readable.json - a readable version of the Analytics Builder Model JSON
+* AI Vision.json - Analytics model
+* gearbox_model.onnx - Trained ONNX model
+* requirements.txt - Python dependencies for training and simulation
 
 ## How to Run the Demo
 
-### 1. Train or regenerate the ONNX model (optional)
+### Train or regenerate the ONNX model (optional)
 
 Run:
 `python3 model_trainer.py`
 
 This produces gearbox_model.onnx.
 
-### 2. Simulate gearbox data over MQTT
+### Upload the ONNX model
+
+Zip gearbox_model.onnx and gearbox_model.onnx.data into gearbox_model.zip
+Upload the zip to the files repository in the Administration page
+
+### Configure the LLM Agent
+
+Create an AI Agent in the AI Agent Manager using agent-system-prompt.txt
+
+### Create the Data Preparation rule
+
+Create a Data Preparation rule subscribed to MQTT topic turbine/gearbox/data
+
+Use data_prep_decoding.js as the Smart Function
+
+### Create the Analytics Builder model
+
+Upload AI Vision.json as an Analytics Builder Model, or create your own model with:
+
+* Event input block
+	- source: Template Device (From Context)
+	- event type: ai_InferenceInput
+	- New events only
+* Smart Function block 1
+	- inputs[0] from Event output
+	- Smart Function from preprocessing.js
+* ONNX block
+	- Input from SF1 outputs[2]
+	- Model name: Template Inference Model Name
+* Smart Function block 2
+	- inputs[0] from SF1 outputs[0]
+	- inputs[1] from SF1 outputs[1]
+	- inputs[2] from ONNX output
+	- Smart Function from decision.js
+* Measurement output block
+	- destination: Template Device
+	- fragment name: c8y_Temperature
+	- series name: c8y_Temperature
+	- Value input from SF2 outputs[0]
+	- Send input from SF2 outputs[2]
+* Measurement output block
+	- destination: Template Device
+	- fragment name: c8y_Torque
+	- series name: c8y_Torque
+	- Value input from SF2 outputs[1]
+	- Send input from SF2 outputs[2]
+* Rate Limiter block
+	- Input from SF2 outputs[3]
+	- Period 60
+* AI agent block
+	- inputs[0] from Rate Limiter output
+	- Agent name: Template Analysis Agent Name
+	- template: {{inputs[0]}}
+* Alarm output block
+	- destination: Template Device
+	- Alarm type: ai_gearBearingIssue
+	- Severity Major
+	- Create input from AI agent output
+	- Message input from AI agent output
+
+### Simulate gearbox data over MQTT
 
 Set MQTT broker details in data_generator.py. Then run:
 `python3 data_generator.py`
 
 This publishes one message per second for 10 minutes, including rare injected failures.
 
-### 3. Configure Analytics Builder
+Data Preparation will then automatically create the device and start posting Events to it
 
-1. Add the MQTT source subscribed to the simulator’s topic.
-2. Add a JavaScript block with decoding.js.
-3. Add the ONNX inference block with gearbox_model.onnx.
-4. Add a JavaScript block with decision.js.
-5. Wire the blocks so that:
-   * JS1 → ONNX (feature vector)
-   * JS1 → JS2 (temperature, torque, etc.)
-   * ONNX → JS2 (class and confidence)
-6. Connect JS2 outputs to Measurements (healthy) and the LLM Agent (faults).
 
-### 4. Configure the LLM Agent
+### Enable analytics on the device
 
-Use agent-system-prompt.txt as the system prompt for consistent, professional responses.
+Go to Smart Rules (new) tab on the device, and create a new instance of your AB model with:
+
+* Inference Model Name: gearbox_model
+* Analysis Agent Name: the name of the agent you created
 
 ## Expected Demo Behaviour
 
-During the 10-minute run:
-• Most samples classify as normal.
-• A few are labelled as early bearing wear, gear tooth damage, or misalignment.
-Healthy cases generate standard Cumulocity measurements.
-Fault cases produce a structured diagnostic from the LLM, which can be routed to alarms, notifications, or downstream workflows.
+In the device Measurements tab you should see:
 
-## Customisation
+* The Event created by data prep
+* The Temperature measurements
+* The Torque measuremnts
 
-Possible extensions:
-* more failure types
-* a richer vibration spectrum
-* additional turbine metadata
-* multi-turbine simulation
-* larger or recurrent ML models
-
-## Purpose
-
-This demo provides a realistic industrial analytics pipeline suitable for:
-* customer workshops
-* solution architecture demos
-* training sessions
-* internal capability showcases
-
-It remains easy to deploy while mirroring an actual predictive maintenance workflow for wind turbine drivetrain components.
-
+In the Alarms tab you should see the created alarm.
